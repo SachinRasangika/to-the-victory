@@ -1,34 +1,138 @@
-import React from 'react'
-import { Link, Route, Routes, Navigate } from 'react-router-dom'
-import Signup from './pages/Signup.jsx'
-import Signin from './pages/Signin.jsx'
-import Profile from './pages/Profile.jsx'
+import { useState, useEffect } from 'react';
+import './App.css';
 
-function Nav() {
-  return (
-    <header className="site-header">
-      <h1 className="site-title">Welcome</h1>
-      <nav className="nav-row">
-        <Link className="button-link" to="/signup">Sign up</Link>
-        <Link className="button-link" to="/signin">Sign in</Link>
-        <Link className="button-link" to="/profile">Profile</Link>
-      </nav>
-    </header>
-  )
-}
+function App() {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
 
-export default function App() {
+  // Fetch users
+  const fetchUsers = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const res = await fetch('/api/users');
+      if (!res.ok) throw new Error('Failed to fetch users');
+      const data = await res.json();
+      setUsers(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create user
+  const handleAddUser = async (e) => {
+    e.preventDefault();
+    if (!name || !email) {
+      setError('Name and email are required');
+      return;
+    }
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email }),
+      });
+      if (!res.ok) throw new Error('Failed to create user');
+      const newUser = await res.json();
+      setUsers([...users, newUser]);
+      setName('');
+      setEmail('');
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // Delete user
+  const handleDeleteUser = async (id) => {
+    try {
+      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete user');
+      setUsers(users.filter(u => u._id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  // Load users on mount
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
   return (
-    <div className="page-shell">
-      <Nav />
-      <main className="content-area">
-        <Routes>
-          <Route path="/" element={<Navigate to="/signup" replace />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/signin" element={<Signin />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
+    <div className="container">
+      <header>
+        <h1>User Management</h1>
+      </header>
+
+      <main>
+        <section className="form-section">
+          <h2>Add User</h2>
+          <form onSubmit={handleAddUser}>
+            <div className="form-group">
+              <label>Name</label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter name"
+              />
+            </div>
+            <div className="form-group">
+              <label>Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter email"
+              />
+            </div>
+            <button type="submit">Add User</button>
+          </form>
+          {error && <p className="error">{error}</p>}
+        </section>
+
+        <section className="users-section">
+          <h2>Users List</h2>
+          {loading ? (
+            <p>Loading...</p>
+          ) : users.length === 0 ? (
+            <p>No users found</p>
+          ) : (
+            <table className="users-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Created</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user) => (
+                  <tr key={user._id}>
+                    <td>{user.name}</td>
+                    <td>{user.email}</td>
+                    <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                    <td>
+                      <button onClick={() => handleDeleteUser(user._id)} className="delete-btn">
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
       </main>
     </div>
-  )
+  );
 }
+
+export default App;

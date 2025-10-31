@@ -1,44 +1,37 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const mongoose = require('mongoose');
+const connectDB = require('./config/db');
 
 dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3005;
+const PORT = process.env.PORT || 3005;
 
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-// Health endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', uptime: process.uptime(), timestamp: new Date().toISOString() });
-});
-
-// DB
-const path = require('path');
-const connectDB = require('./config/db');
+// Connect to database
 connectDB();
 
-// Routes
-const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
+// API Routes
+const apiRoutes = require('./routes/api');
+app.use('/api', apiRoutes);
 
-// Test route
-app.get('/api/test', (req, res) => {
-  res.status(200).json({ ok: true, time: new Date().toISOString() });
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', message: 'Server is running' });
 });
 
-// Static frontend
-const publicDir = path.join(__dirname, '../frontend');
-console.log('Static dir:', publicDir);
-app.use(express.static(publicDir));
-app.get('/', (req, res) => {
-  res.sendFile(path.join(publicDir, 'index.html'));
+// Error handler
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  if (!res.headersSent) {
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
