@@ -17,7 +17,9 @@ connectDB();
 
 // API Routes
 const apiRoutes = require('./routes/api');
+const authRoutes = require('./routes/auth');
 app.use('/api', apiRoutes);
+app.use('/api/auth', authRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

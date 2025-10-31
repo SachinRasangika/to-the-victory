@@ -1,137 +1,83 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
+import ThroneRoom from './pages/ThroneRoom';
 import './App.css';
 
-function App() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+function NavBar() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [user, setUser] = useState(null);
 
-  // Fetch users
-  const fetchUsers = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch('/api/users');
-      if (!res.ok) throw new Error('Failed to fetch users');
-      const data = await res.json();
-      setUsers(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Create user
-  const handleAddUser = async (e) => {
-    e.preventDefault();
-    if (!name || !email) {
-      setError('Name and email are required');
-      return;
-    }
-    try {
-      const res = await fetch('/api/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email }),
-      });
-      if (!res.ok) throw new Error('Failed to create user');
-      const newUser = await res.json();
-      setUsers([...users, newUser]);
-      setName('');
-      setEmail('');
-      setError('');
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // Delete user
-  const handleDeleteUser = async (id) => {
-    try {
-      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete user');
-      setUsers(users.filter(u => u._id !== id));
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  // Load users on mount
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, [location]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    navigate('/login');
+  };
+
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+
+  if (isAuthPage) {
+    return null;
+  }
 
   return (
-    <div className="container">
-      <header>
-        <h1>User Management</h1>
-      </header>
+    <nav className="navbar">
+      <div className="navbar-container">
+        <h2 className="navbar-brand">App</h2>
+        {user && (
+          <div className="navbar-actions">
+            <span className="navbar-user">{user.name}</span>
+            <button onClick={handleLogout} className="logout-btn">
+              Logout
+            </button>
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+}
 
-      <main>
-        <section className="form-section">
-          <h2>Add User</h2>
-          <form onSubmit={handleAddUser}>
-            <div className="form-group">
-              <label>Name</label>
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter name"
-              />
-            </div>
-            <div className="form-group">
-              <label>Email</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter email"
-              />
-            </div>
-            <button type="submit">Add User</button>
-          </form>
-          {error && <p className="error">{error}</p>}
-        </section>
+function ProtectedRoute({ children }) {
+  const token = localStorage.getItem('token');
+  return token ? children : <Navigate to="/login" />;
+}
 
-        <section className="users-section">
-          <h2>Users List</h2>
-          {loading ? (
-            <p>Loading...</p>
-          ) : users.length === 0 ? (
-            <p>No users found</p>
-          ) : (
-            <table className="users-table">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Created</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user._id}>
-                    <td>{user.name}</td>
-                    <td>{user.email}</td>
-                    <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                    <td>
-                      <button onClick={() => handleDeleteUser(user._id)} className="delete-btn">
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
-      </main>
-    </div>
+function App() {
+  return (
+    <Router>
+      <NavBar />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/throne"
+          element={
+            <ProtectedRoute>
+              <ThroneRoom />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
   );
 }
 
