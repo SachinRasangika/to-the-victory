@@ -6,34 +6,66 @@ const connectDB = require('./config/db');
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3005;
+const PORT = process.env.PORT || 3008;
 
-// Middleware
+console.log(`🔧 Initializing Express app...`);
+console.log(`📍 PORT: ${PORT}`);
+
 app.use(cors());
 app.use(express.json());
 
-// Connect to database
+// Early logging middleware
+app.use((req, res, next) => {
+  console.log(`📨 REQUEST: ${req.method} ${req.path} from ${req.ip}`);
+  next();
+});
+
 connectDB();
 
-// API Routes
-const apiRoutes = require('./routes/api');
-const authRoutes = require('./routes/auth');
-app.use('/api', apiRoutes);
-app.use('/api/auth', authRoutes);
+console.log('📍 Mounting routes...');
+app.use('/api/auth', require('./routes/auth'));
+console.log('✅ Auth routes mounted at /api/auth');
+app.use('/api/users', require('./routes/users'));
+console.log('✅ Users routes mounted at /api/users');
+app.use('/api/game', require('./routes/game'));
+console.log('✅ Game routes mounted at /api/game');
 
-// Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', message: 'Server is running' });
+  console.log('🏥 Health check');
+  res.json({ status: 'ok', message: 'Server is running', timestamp: new Date().toISOString() });
+});
+
+app.get('/api/test', (req, res) => {
+  console.log('🧪 Test endpoint hit');
+  res.json({ message: 'Test endpoint works' });
+});
+
+// 404 handler
+app.use((req, res, next) => {
+  console.log(`❌ NO HANDLER for ${req.method} ${req.path}`);
+  res.status(404).json({ error: 'Route not found', path: req.path, method: req.method });
 });
 
 // Error handler
 app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  if (!res.headersSent) {
-    res.status(500).json({ error: 'Server error' });
-  }
+  console.error('💥 SERVER ERROR:', err);
+  res.status(500).json({ error: 'Server error', message: err.message });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`\n✅ SERVER STARTED`);
+  console.log(`🚀 Listening on http://localhost:${PORT}`);
+  console.log(`📊 Routes ready:\n   - GET /health\n   - GET /api/test\n   - POST /api/auth/signup\n   - POST /api/game/attempt`);
+});
+
+server.on('error', (err) => {
+  console.error(`💥 SERVER ERROR: ${err.message}`);
+  if (err.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${PORT} is already in use!`);
+  }
+  process.exit(1);
+});
+
+server.on('listening', () => {
+  console.log(`🔗 Server successfully bound to port ${PORT}`);
 });

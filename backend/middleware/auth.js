@@ -1,20 +1,19 @@
 const jwt = require('jsonwebtoken');
 
-function getSecret() {
-  const secret = process.env.JWT_SECRET || process.env.SECRET_KEY || 'dev_secret_key';
-  return secret;
-}
-
-module.exports.signToken = function (payload, options = {}) {
-  const secret = getSecret();
-  const defaultOpts = { expiresIn: '7d' };
-  return jwt.sign(payload, secret, { ...defaultOpts, ...options });
-};
-
-module.exports.verifyToken = function (token) {
+const auth = (req, res, next) => {
   try {
-    return jwt.verify(token, getSecret());
-  } catch (err) {
-    return null;
+    const token = req.headers.authorization?.split(' ')[1];
+    
+    if (!token) {
+      return res.status(401).json({ error: 'No token provided' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret-key');
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' });
   }
 };
+
+module.exports = auth;

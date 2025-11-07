@@ -1,0 +1,237 @@
+.credits-page {
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: url('https://api.builder.io/api/v1/image/assets/TEMP/59905c6f3bf32ebbc2992ed360b30369d241e2f2?width=2934') center/cover fixed no-repeat;
+}
+
+.credits-page::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, rgba(21, 17, 13, 0) 25%, rgba(21, 17, 13, 0) 75%, rgba(0, 0, 0, 0.5) 100%);
+  pointer-events: none;
+}
+
+.credits-bg-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.credits-container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.credits-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.credits-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.1);
+  color: #FBBF24;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.credits-back-btn:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.5);
+}
+
+.credits-title {
+  color: #FEF3C7;
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.credits-card {
+  padding: 2rem;
+  border-radius: 8px;
+  border: 2px solid rgba(180, 83, 9, 0.5);
+  background: rgba(28, 25, 23, 0.8);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.credits-section {
+  margin-bottom: 2rem;
+}
+
+.credits-section:last-child {
+  margin-bottom: 0;
+}
+
+.credits-section-title {
+  color: #FBBF24;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.credits-text {
+  color: rgba(253, 230, 138, 0.8);
+  font-size: 14px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.credits-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.credit-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 6px;
+  background: rgba(41, 37, 36, 0.3);
+}
+
+.credit-role {
+  color: #FBBF24;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.credit-name {
+  color: rgba(253, 230, 138, 0.7);
+  font-size: 13px;
+}
+
+.thanks-list {
+  color: rgba(253, 230, 138, 0.75);
+  font-size: 13px;
+  line-height: 1.8;
+}
+
+.thanks-list p {
+  margin: 0.5rem 0;
+}
+
+.tech-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tech-item {
+  padding: 0.75rem;
+  border-radius: 6px;
+  background: rgba(41, 37, 36, 0.3);
+  color: rgba(253, 230, 138, 0.8);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.tech-item strong {
+  color: #FBBF24;
+}
+
+.legal-links {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.legal-link {
+  color: #FBBF24;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.legal-link:hover {
+  color: #FCD34D;
+  border-bottom-color: #FBBF24;
+}
+
+.credits-footer {
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(245, 158, 11, 0.2);
+  margin-top: 1rem;
+}
+
+.credits-tagline {
+  color: rgba(253, 230, 138, 0.9);
+  font-size: 14px;
+  font-style: italic;
+  margin: 0 0 0.75rem 0;
+}
+
+.credits-copyright {
+  color: rgba(252, 211, 77, 0.6);
+  font-size: 12px;
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .credits-card {
+    padding: 1.5rem;
+  }
+
+  .credits-title {
+    font-size: 24px;
+  }
+
+  .credits-section-title {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .credits-card {
+    padding: 1rem;
+  }
+
+  .credits-title {
+    font-size: 20px;
+  }
+
+  .legal-links {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}

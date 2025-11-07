@@ -4,6 +4,13 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import ThroneRoom from './pages/ThroneRoom';
+import MainMenu from './pages/MainMenu';
+import Settings from './pages/Settings';
+import Profile from './pages/Profile';
+import Leaderboard from './pages/Leaderboard';
+import HowToPlay from './pages/HowToPlay';
+import Credits from './pages/Credits';
+import Game from './pages/Game';
 import './App.css';
 
 function NavBar() {
@@ -25,7 +32,7 @@ function NavBar() {
     navigate('/login');
   };
 
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/menu' || location.pathname === '/settings' || location.pathname === '/profile' || location.pathname === '/leaderboard' || location.pathname === '/how-to-play' || location.pathname === '/credits' || location.pathname === '/game';
 
   if (isAuthPage) {
     return null;
@@ -55,11 +62,67 @@ function ProtectedRoute({ children }) {
 
 function App() {
   return (
-    <Router>
+    <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <NavBar />
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route
+          path="/menu"
+          element={
+            <ProtectedRoute>
+              <MainMenu />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/leaderboard"
+          element={
+            <ProtectedRoute>
+              <Leaderboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/how-to-play"
+          element={
+            <ProtectedRoute>
+              <HowToPlay />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/credits"
+          element={
+            <ProtectedRoute>
+              <Credits />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/game"
+          element={
+            <ProtectedRoute>
+              <Game />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/throne"
           element={

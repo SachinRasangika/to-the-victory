@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "dev": "node scripts/dev.js"
+  },
   "devDependencies": {
     "css-loader": "^7.1.2",
     "html-webpack-plugin": "^5.6.4",
