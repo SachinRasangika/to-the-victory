@@ -49,9 +49,9 @@ export default function JourneyScreen({
       <div className="journey-overlay-dark"></div>
 
       <div className="journey-background">
-        <img 
-          src={illustrationUrl || 'https://api.builder.io/api/v1/image/assets/TEMP/a65e7634e86592dd3b6320a06cb7ba0ddc7616dc'} 
-          alt="Journey background" 
+        <img
+          src={illustrationUrl || '/images/placeholder-bg.png'}
+          alt="Journey background"
           className="journey-bg-image"
         />
         <div className="journey-gradient-top"></div>
@@ -120,7 +120,7 @@ export default function JourneyScreen({
               {!hideIllustration && (
                 <div className="illustration-container">
                   <img
-                    src={illustrationUrl || 'https://api.builder.io/api/v1/image/assets/TEMP/b5986952aabe2588e520f8191b5a89d2b81ffc02'}
+                    src={illustrationUrl || '/images/placeholder.png'}
                     alt={sceneTitle}
                     className="scene-illustration"
                   />

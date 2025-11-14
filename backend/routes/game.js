@@ -4,6 +4,18 @@ const auth = require('../middleware/auth');
 const Attempt = require('../models/Attempt');
 const UserScores = require('../models/UserScores');
 const { calculateScore } = require('../utils/scoreCalculator');
+const { getBananaPuzzle } = require('../utils/bananaClient');
+
+// Get a banana puzzle (with fallback)
+router.get('/puzzle', async (req, res) => {
+  try {
+    const puzzle = await getBananaPuzzle();
+    res.json(puzzle);
+  } catch (error) {
+    console.error('Error fetching puzzle:', error);
+    res.status(500).json({ error: 'Failed to fetch puzzle' });
+  }
+});
 
 // Save attempt
 router.post('/attempt', auth, async (req, res) => {

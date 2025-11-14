@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Clock } from 'lucide-react';
+import { Clock, Pause, RotateCcw } from 'lucide-react';
+import { emit, on, clearListeners } from '../eventBus';
 import LiveScorePreview from './LiveScorePreview';
 import '../styles/banana-game-step.css';
 
@@ -16,17 +17,27 @@ export default function BananaGameStep({
   const [timeRemaining, setTimeRemaining] = useState(timeLimit);
   const [isCorrect, setIsCorrect] = useState(null);
   const [wrongAttempts, setWrongAttempts] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     fetchGameData();
+
+    const unsubscribePause = on('pause', handlePauseGame);
+    const unsubscribeRestart = on('restart', handleRestartGame);
+
+    return () => {
+      unsubscribePause();
+      unsubscribeRestart();
+    };
   }, []);
 
   useEffect(() => {
-    if (!loading && timeRemaining > 0 && selectedAnswer === null) {
+    if (!loading && timeRemaining > 0 && selectedAnswer === null && !isPaused) {
       const timer = setInterval(() => {
         setTimeRemaining((prev) => {
           if (prev <= 1) {
             clearInterval(timer);
+            emit('timeout', { timeRemaining: 0, wrongAttempts });
             if (onGameComplete) {
               onGameComplete({
                 correctAnswer: false,
@@ -45,12 +56,32 @@ export default function BananaGameStep({
 
       return () => clearInterval(timer);
     }
-  }, [loading, timeRemaining, selectedAnswer, onTimeout, onGameComplete, wrongAttempts]);
+  }, [loading, timeRemaining, selectedAnswer, onTimeout, onGameComplete, wrongAttempts, isPaused]);
+
+  const handlePauseGame = () => {
+    setIsPaused(true);
+    emit('gamePaused', { timeRemaining, wrongAttempts });
+  };
+
+  const handleResumeGame = () => {
+    setIsPaused(false);
+    emit('gameResumed', { timeRemaining, wrongAttempts });
+  };
+
+  const handleRestartGame = () => {
+    setSelectedAnswer(null);
+    setTimeRemaining(timeLimit);
+    setIsCorrect(null);
+    setWrongAttempts(0);
+    setIsPaused(false);
+    fetchGameData();
+    emit('gameRestarted', { timeRemaining: timeLimit, wrongAttempts: 0 });
+  };
 
   const fetchGameData = async () => {
     try {
       setError(null);
-      const response = await fetch('https://marcconrad.com/uob/banana/api.php');
+      const response = await fetch('/api/game/puzzle');
       const data = await response.json();
 
       const correctAnswer = data.solution;
@@ -58,7 +89,7 @@ export default function BananaGameStep({
       const allAnswers = shuffleArray([correctAnswer, ...wrongAnswers]);
 
       setGameData({
-        imageUrl: data.question,
+        imageUrl: data.image || data.question,
         correctAnswer: correctAnswer,
         answers: allAnswers,
       });
@@ -92,7 +123,7 @@ export default function BananaGameStep({
   };
 
   const handleAnswerClick = (answer) => {
-    if (selectedAnswer !== null) return;
+    if (selectedAnswer !== null || isPaused) return;
 
     setSelectedAnswer(answer);
     const correct = answer === gameData.correctAnswer;
@@ -105,6 +136,11 @@ export default function BananaGameStep({
       }, 800);
     } else {
       setTimeout(() => {
+        emit('gameComplete', {
+          correctAnswer: true,
+          timeRemaining,
+          wrongAttempts,
+        });
         if (onGameComplete) {
           onGameComplete({
             correctAnswer: true,
@@ -242,6 +278,36 @@ export default function BananaGameStep({
           <div className="game-timer">
             <Clock size={24} color="#FBBF24" strokeWidth={2} />
             <span className="timer-text">{timeRemaining} s</span>
+          </div>
+
+          <div className="game-controls">
+            {!isPaused ? (
+              <button
+                className="control-btn pause-btn"
+                onClick={handlePauseGame}
+                title="Pause game"
+              >
+                <Pause size={20} color="#FBBF24" strokeWidth={2} />
+                <span>Pause</span>
+              </button>
+            ) : (
+              <button
+                className="control-btn resume-btn"
+                onClick={handleResumeGame}
+                title="Resume game"
+              >
+                <Pause size={20} color="#FBBF24" strokeWidth={2} />
+                <span>Resume</span>
+              </button>
+            )}
+            <button
+              className="control-btn restart-btn"
+              onClick={handleRestartGame}
+              title="Restart game"
+            >
+              <RotateCcw size={20} color="#FBBF24" strokeWidth={2} />
+              <span>Restart</span>
+            </button>
           </div>
 
           <LiveScorePreview

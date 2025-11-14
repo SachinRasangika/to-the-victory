@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import JourneyScreen from './JourneyScreen';
 import BananaGameStep from '../components/BananaGameStep';
 import ScoreSummary from '../components/ScoreSummary';
+import { on, clearListeners } from '../eventBus';
 import { calculateScore } from '../utils/scoreCalculator';
 import { saveAttempt } from '../utils/gameApi';
 
@@ -10,7 +11,7 @@ const gameScenes = [
   {
     sceneNumber: 1,
     sceneTitle: "The Castle Gate – The Guard's Challenge",
-    illustrationUrl: "https://api.builder.io/api/v1/image/assets/TEMP/b5986952aabe2588e520f8191b5a89d2b81ffc02",
+    illustrationUrl: "/images/scene1.png",
     characterName: "Villager",
     dialogue: "Noble guard, I have traveled far to accept the King's Great Challenge. Please, allow me to prove my worth.",
     narrativeText: "The humble villager bows respectfully before the royal gate",
@@ -19,7 +20,7 @@ const gameScenes = [
   {
     sceneNumber: 2,
     sceneTitle: "The Throne Room – The King's Test",
-    illustrationUrl: "https://api.builder.io/api/v1/image/assets/TEMP/b5986952aabe2588e520f8191b5a89d2b81ffc02",
+    illustrationUrl: "/images/scene2.png",
     characterName: "King",
     dialogue: "Welcome, brave traveler. Many have sought the throne, but few have proven themselves worthy. Are you prepared to face my challenge?",
     narrativeText: "The king's voice echoes through the grand hall",
@@ -33,7 +34,7 @@ const gameScenes = [
   {
     sceneNumber: 4,
     sceneTitle: "The Final Trial – Victory or Defeat",
-    illustrationUrl: "https://api.builder.io/api/v1/image/assets/TEMP/b5986952aabe2588e520f8191b5a89d2b81ffc02",
+    illustrationUrl: "/images/scene4.png",
     characterName: "Narrator",
     dialogue: "You have completed the trials and proven your worth. The throne awaits its rightful ruler. Will you claim your destiny?",
     narrativeText: "The path to the throne is now clear",
@@ -51,7 +52,55 @@ export default function Game() {
   const [gameAttempt, setGameAttempt] = useState(null);
   const [scoreBreakdown, setScoreBreakdown] = useState(null);
   const [gameStartTime] = useState(Date.now());
+  const [gameStatus, setGameStatus] = useState('playing'); // 'playing', 'paused', 'timeout'
   const navigate = useNavigate();
+
+  const handleGamePaused = useCallback(() => {
+    setGameStatus('paused');
+    console.log('🎮 Game paused event received');
+  }, []);
+
+  const handleGameResumed = useCallback(() => {
+    setGameStatus('playing');
+    console.log('🎮 Game resumed event received');
+  }, []);
+
+  const handleGameTimeout = useCallback(() => {
+    setGameStatus('timeout');
+    console.log('⏱️ Game timeout event received');
+  }, []);
+
+  const handleGameRestarted = useCallback(() => {
+    setGameComplete(false);
+    setShowScoreSummary(false);
+    setGameAttempt(null);
+    setScoreBreakdown(null);
+    setGameStatus('playing');
+    console.log('🔄 Game restarted event received');
+  }, []);
+
+  useEffect(() => {
+    const unsubscribeGamePaused = on('gamePaused', () => {
+      Promise.resolve().then(handleGamePaused);
+    });
+    const unsubscribeGameResumed = on('gameResumed', () => {
+      Promise.resolve().then(handleGameResumed);
+    });
+    const unsubscribeTimeout = on('timeout', () => {
+      Promise.resolve().then(handleGameTimeout);
+    });
+    const unsubscribeGameRestarted = on('gameRestarted', () => {
+      Promise.resolve().then(handleGameRestarted);
+    });
+
+    return () => {
+      unsubscribeGamePaused();
+      unsubscribeGameResumed();
+      unsubscribeTimeout();
+      unsubscribeGameRestarted();
+      clearListeners();
+    };
+  }, [handleGamePaused, handleGameResumed, handleGameTimeout, handleGameRestarted]);
 
   const handleNext = () => {
     if (currentScene < gameScenes.length - 1) {
