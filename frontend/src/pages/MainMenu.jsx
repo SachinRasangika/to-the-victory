@@ -12,7 +12,7 @@ export default function MainMenu() {
   };
 
   const handleStartGame = () => {
-    navigate('/game');
+    navigate('/levels');
   };
 
   return (

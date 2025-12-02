@@ -1,6 +1,7 @@
 {
-  "command": "npm run",
-  "serverUrl": "http://localhost:3005",
+  "command": "npm run start",
+  "serverUrl": "",
   "authenticateProxy": false,
+  "autoDetectDevServer": true,
   "commitMode": "commits"
 }

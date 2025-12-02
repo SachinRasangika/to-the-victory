@@ -6,10 +6,12 @@ const frontendPath = path.join(__dirname, '..', 'frontend');
 
 console.log('Starting backend and frontend servers...\n');
 
-// Kill any existing node processes on port 3005
-console.log('🧹 Cleaning up old processes on port 3005...');
+// Kill any existing node processes on ports 3005, 3006, 35068
+console.log('🧹 Cleaning up old processes...');
 exec('lsof -ti:3005 | xargs kill -9 2>/dev/null || true', () => {
-  startServers();
+  exec('lsof -ti:35068 | xargs kill -9 2>/dev/null || true', () => {
+    startServers();
+  });
 });
 
 function startServers() {

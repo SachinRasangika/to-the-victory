@@ -11,6 +11,7 @@ import Leaderboard from './pages/Leaderboard';
 import HowToPlay from './pages/HowToPlay';
 import Credits from './pages/Credits';
 import Game from './pages/Game';
+import LevelSelection from './pages/LevelSelection';
 import './App.css';
 
 function NavBar() {
@@ -32,7 +33,7 @@ function NavBar() {
     navigate('/login');
   };
 
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/menu' || location.pathname === '/settings' || location.pathname === '/profile' || location.pathname === '/leaderboard' || location.pathname === '/how-to-play' || location.pathname === '/credits' || location.pathname === '/game';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/menu' || location.pathname === '/settings' || location.pathname === '/profile' || location.pathname === '/leaderboard' || location.pathname === '/how-to-play' || location.pathname === '/credits' || location.pathname === '/levels' || location.pathname.startsWith('/game/');
 
   if (isAuthPage) {
     return null;
@@ -116,7 +117,15 @@ function App() {
           }
         />
         <Route
-          path="/game"
+          path="/levels"
+          element={
+            <ProtectedRoute>
+              <LevelSelection />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/game/:levelId"
           element={
             <ProtectedRoute>
               <Game />

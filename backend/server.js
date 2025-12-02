@@ -30,6 +30,10 @@ console.log('✅ Users routes mounted at /api/users');
 app.use('/api/game', require('./routes/game'));
 console.log('✅ Game routes mounted at /api/game');
 
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', message: 'API is running' });
+});
+
 app.get('/health', (req, res) => {
   console.log('🏥 Health check');
   res.json({ status: 'ok', message: 'Server is running', timestamp: new Date().toISOString() });
