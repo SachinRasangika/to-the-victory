@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Crown, User, Mail, Lock } from 'lucide-react';
+import PasswordStrengthMeter from '../components/PasswordStrengthMeter';
+import { validatePasswordStrength } from '../utils/passwordStrength';
 import '../styles/chronicles-auth.css';
 
 export default function Signup() {
@@ -33,8 +35,9 @@ export default function Signup() {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    const passwordValidation = validatePasswordStrength(formData.password);
+    if (!passwordValidation.isValid) {
+      setError(passwordValidation.failures.join(', '));
       return;
     }
 
@@ -130,10 +133,11 @@ export default function Signup() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="Create your seal"
-                  minLength="6"
+                  minLength="8"
                   required
                 />
               </div>
+              {formData.password && <PasswordStrengthMeter password={formData.password} />}
             </div>
 
             <div className="chronicles-field">

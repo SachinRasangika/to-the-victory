@@ -1,6 +1,7 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { validatePasswordStrength } = require('../utils/passwordValidator');
 
 const router = express.Router();
 
@@ -10,6 +11,14 @@ router.post('/signup', async (req, res) => {
 
     if (!name || !email || !password) {
       return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const passwordValidation = validatePasswordStrength(password);
+    if (!passwordValidation.isValid) {
+      return res.status(400).json({
+        error: 'Password does not meet security requirements',
+        details: passwordValidation.errors,
+      });
     }
 
     const existingUser = await User.findOne({ email });
